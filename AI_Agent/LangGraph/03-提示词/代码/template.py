@@ -46,3 +46,15 @@ def apply_prompt_template(prompt_name: str, state: AgentState) -> list:
     # 返回系统提示和历史消息的组合
     # 系统提示作为第一条消息，角色为system，后面跟着状态中的历史消息
     return [{"role": "system", "content": system_prompt}] + state["messages"]
+
+
+print("======================使用方法提示===============================================")
+# 高级版本
+research_agent = create_react_agent(
+    get_llm_by_type(AGENT_LLM_MAP["researcher"]),
+    tools=[tavily_tool, crawl_tool],
+    prompt=lambda state: apply_prompt_template("researcher", state),
+)
+
+# 简单版本
+messages = apply_prompt_template("supervisor", state)
