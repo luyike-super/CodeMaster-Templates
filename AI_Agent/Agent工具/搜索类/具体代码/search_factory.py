@@ -1,4 +1,4 @@
-from app.utils.search.search_engine import SearchEngine, TavilySearchEngine
+from app.utils.search.search_engine import SearchEngine, TavilySearchEngine, JinaSearchEngine
 from app.utils.search.search_engine_type import SearchEngineType
 from dotenv import load_dotenv
 import os
@@ -26,6 +26,12 @@ class SearchEngineFactory:
                 load_dotenv()
                 api_key = os.getenv("TAVILY_API_KEY")
             return TavilySearchEngine(api_key=api_key)
+        elif engine_type == SearchEngineType.JINA:
+            api_key = kwargs.get("api_key")
+            if not api_key:
+                load_dotenv()
+                api_key = os.getenv("JINA_API_KEY")
+            return JinaSearchEngine(api_key=api_key)
         # 可以在此添加其他搜索引擎的支持
         # elif engine_type == SearchEngineType.GOOGLE:
         #     return GoogleSearchEngine(**kwargs)
