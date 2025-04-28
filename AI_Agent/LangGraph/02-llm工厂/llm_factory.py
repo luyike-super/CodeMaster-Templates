@@ -1,10 +1,19 @@
 from typing import Dict, Type, Optional, Any, Mapping
 from abc import ABC, abstractmethod
 from dotenv import load_dotenv
+from enum import Enum, auto
 import os
-from .llm_providers import LLMProviderType
 
 load_dotenv()
+
+class LLMProviderType(Enum):
+    """LLM提供商类型枚举"""
+    DEEPSEEK = "deepseek"
+    OPENAI = "openai"
+    QIANWEN = "qianwen"
+    
+    def __str__(self) -> str:
+        return self.value 
 
 class LLMProvider(ABC):
     """LLM提供商的抽象基类，定义所有LLM提供商必须实现的接口"""
@@ -19,7 +28,7 @@ class DeepSeekProvider(LLMProvider):
     
     def get_llm(self, **kwargs) -> Any:
         from langchain_deepseek import ChatDeepSeek
-        
+        print(os.getenv("DEEPSEEK_API_KEY"))
         # 默认配置
         config = {
             "api_key": os.getenv("DEEPSEEK_API_KEY"),
@@ -47,7 +56,21 @@ class QianWenProvider(LLMProvider):
     """千问 LLM提供商实现"""
     
     def get_llm(self, **kwargs) -> Any:
-        pass
+        """
+        通义千问（Qwen）LLM实现，基于 langchain_community.llms.Tongyi
+        支持参数：dashscope_api_key, model, temperature, max_tokens 等
+        """
+        from langchain_community.llms import Tongyi
+        # 优先使用传入的 dashscope_api_key，否则用环境变量
+        api_key = kwargs.pop("dashscope_api_key", None) or os.getenv("DASHSCOPE_API_KEY")
+        if api_key:
+            os.environ["DASHSCOPE_API_KEY"] = api_key
+        # 支持 model、temperature、max_tokens 等参数
+        model = kwargs.pop("model", os.getenv("QWEN_MODEL", "qwen-plus"))
+        temperature = kwargs.pop("temperature", 0)
+        max_tokens = kwargs.pop("max_tokens", None)
+        # 其他参数可继续扩展
+        return Tongyi(model_name=model, temperature=temperature, max_tokens=max_tokens, **kwargs)
 
 
 class LLMFactory:
