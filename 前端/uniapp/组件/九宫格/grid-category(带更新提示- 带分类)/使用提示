@@ -1,0 +1,7 @@
+<!-- 分类九宫格 -->
+<view class="category-section">
+    <GridCategory
+        :list="categoryList"
+        @click="handleCategoryClick"
+    />
+</view>
